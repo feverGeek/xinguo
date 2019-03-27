@@ -37,7 +37,7 @@ text-decoration: underline;</string>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="label_author">
          <property name="text">
           <string>Written by xinguo 
      Zeta</string>
@@ -47,14 +47,14 @@ text-decoration: underline;</string>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="pushButton_login">
            <property name="text">
             <string>上线</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="pushButton_exit">
            <property name="text">
             <string>退出</string>
            </property>
@@ -82,7 +82,7 @@ text-decoration: underline;</string>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="pushButton_clear">
          <property name="text">
           <string>清除消息</string>
          </property>
