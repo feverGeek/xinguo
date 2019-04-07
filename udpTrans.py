@@ -35,29 +35,36 @@ class UdpTrans(client_ui.Ui_Dialog):
             self.signalMsgBoxPrompt.emit(msg)
 
         while self.__running:
-            print("123")
-            time.sleep(1)
-        # while self.__running.is_set():
-        #     print("1")
-        #     recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024, 10)
-        #     recvMsg = 'http://' + recvMsg.decode()
-        #     print(recvMsg)
-        #     msg = '来自IP:{}端口:{}:\n{}\n'.format(self.remoteAddr[0], self.remoteAddr[1], recvMsg)
-        #     self.signalMsgTip.emit(msg)
-        #     self.udp_send_common()
-        #     self.udp_send_used()
-        #     self.udp_download(recvMsg)
-        #     self.udp_send_unused()
+            recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024, 10)
+            recvMsg = 'http://' + recvMsg.decode()
+            print(recvMsg)
+            msg = '{}\n来自IP:{}端口:{}:\n{}\n'.format(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
+                                                   self.remoteAddr[0],
+                                                   self.remoteAddr[1],
+                                                   recvMsg)
+            self.signalMsgTip.emit(msg)
+            self.udp_send_common()
+            self.udp_send_used()
+            try:
+                if self.udp_download(recvMsg):
+                    msg = '图片成功接收'
+                    self.signalStatusAreaTip.emit(msg)
+                self.udp_send_unused()
+            except Exception:
+                pass
 
     def udp_download(self, url):
-        r = requests.get(url)
-        img = r.content
-        nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-        imgName = nowTime + '.bmp'
-        with open('./img/{}'.format(imgName), 'wb') as f:
-            f.write(img)
-        f.close()
-        return './img/' + imgName
+        try:
+            r = requests.get(url)
+            img = r.content
+            nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            imgName = nowTime + '.bmp'
+            with open('./img/{}'.format(imgName), 'wb') as f:
+                f.write(img)
+            f.close()
+            return './img/' + imgName
+        except Exception:
+            return None
 
     def udp_send_common(self):
         """
