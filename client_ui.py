@@ -7,8 +7,19 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
+import udpTrans
+import time
 
-class Ui_Dialog(object):
+
+class Ui_Dialog(QtWidgets.QDialog):
+    signalMsgBoxPrompt = QtCore.pyqtSignal(str)
+    signalMsgTip = QtCore.pyqtSignal(str)
+    signalStatusAreaTip = QtCore.pyqtSignal(str)
+
+    def __init__(self):
+        super().__init__()
+
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(550, 391)
@@ -23,9 +34,9 @@ class Ui_Dialog(object):
 "text-decoration: underline;")
         self.label_status.setObjectName("label_status")
         self.verticalLayout_2.addWidget(self.label_status)
-        self.textEdit = QtWidgets.QTextEdit(Dialog)
-        self.textEdit.setObjectName("textEdit")
-        self.verticalLayout_2.addWidget(self.textEdit)
+        self.textEditStatus = QtWidgets.QTextEdit(Dialog)
+        self.textEditStatus.setObjectName("textEditStatus")
+        self.verticalLayout_2.addWidget(self.textEditStatus)
         self.verticalLayout_4.addLayout(self.verticalLayout_2)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -34,12 +45,6 @@ class Ui_Dialog(object):
         self.horizontalLayout_2.addWidget(self.label_author)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
-        self.pushButton_login = QtWidgets.QPushButton(Dialog)
-        self.pushButton_login.setObjectName("pushButton_login")
-        self.verticalLayout_3.addWidget(self.pushButton_login)
-        self.pushButton_exit = QtWidgets.QPushButton(Dialog)
-        self.pushButton_exit.setObjectName("pushButton_exit")
-        self.verticalLayout_3.addWidget(self.pushButton_exit)
         self.horizontalLayout_2.addLayout(self.verticalLayout_3)
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
         self.horizontalLayout_3.addLayout(self.verticalLayout_4)
@@ -56,9 +61,9 @@ class Ui_Dialog(object):
         self.pushButton_clear.setObjectName("pushButton_clear")
         self.horizontalLayout.addWidget(self.pushButton_clear)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.textEdit_2 = QtWidgets.QTextEdit(Dialog)
-        self.textEdit_2.setObjectName("textEdit_2")
-        self.verticalLayout.addWidget(self.textEdit_2)
+        self.textEditRecv = QtWidgets.QTextEdit(Dialog)
+        self.textEditRecv.setObjectName("textEditRecv")
+        self.verticalLayout.addWidget(self.textEditRecv)
         self.horizontalLayout_3.addLayout(self.verticalLayout)
 
         self.retranslateUi(Dialog)
@@ -70,8 +75,47 @@ class Ui_Dialog(object):
         self.label_status.setText(_translate("Dialog", "状态区"))
         self.label_author.setText(_translate("Dialog", "Written by xinguo \n"
 "     Zeta"))
-        self.pushButton_login.setText(_translate("Dialog", "上线"))
-        self.pushButton_exit.setText(_translate("Dialog", "退出"))
         self.label_recv.setText(_translate("Dialog", "接收区"))
         self.pushButton_clear.setText(_translate("Dialog", "清除消息"))
+
+    def slot_status_area_tip(self, msg):
+        """
+        状态区显示信息
+        :param msg:
+        :return:
+        """
+        self.textEditStatus.append(msg)
+
+    def slot_recv_area_tip(self, msg):
+        """
+        接收区显示信息
+        :param msg:
+        :return:
+        """
+        self.textEditRecv.append(msg)
+
+    def slot_msg_box_prompt(self, msg):
+        """
+        message box 弹窗
+        :param msg:
+        :return:
+        """
+        QMessageBox.question(self, 'Message', msg, QMessageBox.Yes | QMessageBox.No)
+
+    def slot_clear_recv(self):
+        """
+        清除接收区
+        :return:
+        """
+        pass
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    Dialog = QtWidgets.QDialog()
+    ui = Ui_Dialog()
+    ui.setupUi(Dialog)
+    Dialog.show()
+    sys.exit(app.exec_())
 
