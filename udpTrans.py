@@ -7,6 +7,7 @@ import requests
 import subprocess
 import re
 
+running_flag = True
 
 class UdpTrans(client_ui.Ui_Dialog):
 
@@ -17,7 +18,7 @@ class UdpTrans(client_ui.Ui_Dialog):
         self.udpSocket = socket(AF_INET, SOCK_DGRAM)
         self.serverThread = None
         self.remoteAddr = None
-        self.__running = True
+        self.__running = running_flag
 
     def network_check(self):
         """
@@ -50,6 +51,8 @@ class UdpTrans(client_ui.Ui_Dialog):
             self.signalMsgBoxPrompt.emit(msg)
 
         while self.__running:
+            print(self.__running)
+            self.pushButton_recv.setDisabled(True)
             recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
             recvMsg = 'http://' + recvMsg.decode()
             print(recvMsg)
@@ -57,12 +60,12 @@ class UdpTrans(client_ui.Ui_Dialog):
                                                    self.remoteAddr[0],
                                                    self.remoteAddr[1],
                                                    recvMsg)
+            self.udp_send_used()
             with open('./log/log', 'a+') as f:
                 f.write(msg+'\n')
             f.close()
             self.signalMsgTip.emit(msg)
             self.udp_send_common()
-            self.udp_send_used()
             try:
                 if self.udp_download(recvMsg):
                     msg = '图片成功接收'
@@ -104,6 +107,7 @@ class UdpTrans(client_ui.Ui_Dialog):
         :return:
         """
         self.udpSocket.sendto('2'.encode('utf-8'), self.remoteAddr)
+        self.__running = False
 
     def udp_send_unused(self):
         """
@@ -111,6 +115,7 @@ class UdpTrans(client_ui.Ui_Dialog):
         :return:
         """
         self.udpSocket.sendto('0'.encode('utf-8'), self.remoteAddr)
+        self.pushButton_recv.setEnabled(True)
 
     def udp_close(self):
         """
