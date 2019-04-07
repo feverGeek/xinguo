@@ -35,13 +35,16 @@ class UdpTrans(client_ui.Ui_Dialog):
             self.signalMsgBoxPrompt.emit(msg)
 
         while self.__running:
-            recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024, 10)
+            recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
             recvMsg = 'http://' + recvMsg.decode()
             print(recvMsg)
             msg = '{}\n来自IP:{}端口:{}:\n{}\n'.format(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
                                                    self.remoteAddr[0],
                                                    self.remoteAddr[1],
                                                    recvMsg)
+            with open('./log/log', 'a+') as f:
+                f.write(msg+'\n')
+            f.close()
             self.signalMsgTip.emit(msg)
             self.udp_send_common()
             self.udp_send_used()
@@ -51,9 +54,16 @@ class UdpTrans(client_ui.Ui_Dialog):
                     self.signalStatusAreaTip.emit(msg)
                 self.udp_send_unused()
             except Exception:
-                pass
+                msg = '下载失败'
+                self.signalMsgBoxPrompt.emit(msg)
 
     def udp_download(self, url):
+        """
+        图片下载
+        :param url: 图片链接
+        :return: 成功返回图片路径
+                 失败返回None
+        """
         try:
             r = requests.get(url)
             img = r.content
