@@ -4,7 +4,8 @@ import threading
 import stopThreading
 import datetime
 import requests
-import time
+import subprocess
+import re
 
 
 class UdpTrans(client_ui.Ui_Dialog):
@@ -18,6 +19,22 @@ class UdpTrans(client_ui.Ui_Dialog):
         self.remoteAddr = None
         self.__running = True
 
+    def network_check(self):
+        """
+        网络检查
+        :return:
+        """
+        try:
+            p = subprocess.Popen(['ping -c 1 -W 1 www.baidu.com'], stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
+            out = p.stdout.read().decode()
+            regex = re.compile('1 received')
+            if regex.findall(out)[0] == '1 received':
+                return True
+            else:
+                return False
+        except:
+            return False
+
     def udp_server_start(self):
         self.serverThread = threading.Thread(target=self.udp_server_concurrency)
         self.serverThread.setDaemon(True)
@@ -28,8 +45,6 @@ class UdpTrans(client_ui.Ui_Dialog):
     def udp_server_concurrency(self):
         try:
             self.udpSocket.bind((self.address, self.port))
-        #     while self.__login.isSet():
-        #         self.udpSocket.sendto('login'.encode('utf-8'), (self.address, self.port))
         except Exception:
             msg = '请检查natapp是否开启,如果开启查看端口是否被占用'
             self.signalMsgBoxPrompt.emit(msg)
