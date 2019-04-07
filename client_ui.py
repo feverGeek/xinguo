@@ -9,7 +9,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import udpTrans
-import time
 
 
 class Ui_Dialog(QtWidgets.QDialog):
@@ -40,9 +39,12 @@ class Ui_Dialog(QtWidgets.QDialog):
         self.verticalLayout_4.addLayout(self.verticalLayout_2)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.pushButton_recv = QtWidgets.QPushButton()
+        self.pushButton_recv.setObjectName("pushButton_recv")
         self.label_author = QtWidgets.QLabel(Dialog)
         self.label_author.setObjectName("label_author")
         self.horizontalLayout_2.addWidget(self.label_author)
+        self.horizontalLayout_2.addWidget(self.pushButton_recv)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout_2.addLayout(self.verticalLayout_3)
@@ -77,6 +79,7 @@ class Ui_Dialog(QtWidgets.QDialog):
 "     Zeta"))
         self.label_recv.setText(_translate("Dialog", "接收区"))
         self.pushButton_clear.setText(_translate("Dialog", "清除消息"))
+        self.pushButton_recv.setText(_translate("Dialog", "打开接收"))
 
     def slot_status_area_tip(self, msg):
         """
@@ -107,7 +110,14 @@ class Ui_Dialog(QtWidgets.QDialog):
         清除接收区
         :return:
         """
-        pass
+        self.textEditRecv.clear()
+
+    def slot_recv(self):
+        """
+        打开接收
+        :return:
+        """
+        udpTrans.running_flag = True
 
 
 if __name__ == "__main__":
