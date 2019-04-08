@@ -1,8 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QDialog
-from PyQt5.QtCore import Qt
 import sys
 import udpTrans
-import stopThreading
 
 
 class MainWindow(udpTrans.UdpTrans):
@@ -11,6 +9,7 @@ class MainWindow(udpTrans.UdpTrans):
         self.window = window
         self.setupUi(self.window)
         self.window_connect()
+        self.pushButton_recv.setEnabled(False)
 
         if self.network_check():
             msg = '网络正常'
@@ -31,13 +30,6 @@ class MainWindow(udpTrans.UdpTrans):
         # self.pushButton_exit.clicked.connect(QCoreApplication.quit)
         self.signalStatusAreaTip.connect(self.slot_status_area_tip)
         self.pushButton_recv.clicked.connect(self.slot_recv)
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Escape:
-            print("close")
-            stopThreading.stop_thread(self.serverThread)
-            QApplication.quit()
-            self.udp_close()
 
 
 if __name__ == '__main__':

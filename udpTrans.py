@@ -1,13 +1,13 @@
 from socket import *
 import client_ui
 import threading
-import stopThreading
 import datetime
 import requests
 import subprocess
 import re
 
-running_flag = True
+used_flag = True
+
 
 class UdpTrans(client_ui.Ui_Dialog):
 
@@ -18,7 +18,6 @@ class UdpTrans(client_ui.Ui_Dialog):
         self.udpSocket = socket(AF_INET, SOCK_DGRAM)
         self.serverThread = None
         self.remoteAddr = None
-        self.__running = running_flag
 
     def network_check(self):
         """
@@ -33,7 +32,7 @@ class UdpTrans(client_ui.Ui_Dialog):
                 return True
             else:
                 return False
-        except:
+        except Exception:
             return False
 
     def udp_server_start(self):
@@ -44,36 +43,43 @@ class UdpTrans(client_ui.Ui_Dialog):
         self.signalStatusAreaTip.emit(msg)
 
     def udp_server_concurrency(self):
+        recvMsg = ''
         try:
             self.udpSocket.bind((self.address, self.port))
         except Exception:
             msg = '请检查natapp是否开启,如果开启查看端口是否被占用'
             self.signalMsgBoxPrompt.emit(msg)
 
-        while self.__running:
-            print(self.__running)
-            self.pushButton_recv.setDisabled(True)
-            recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
-            recvMsg = 'http://' + recvMsg.decode()
-            print(recvMsg)
-            msg = '{}\n来自IP:{}端口:{}:\n{}\n'.format(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
-                                                   self.remoteAddr[0],
-                                                   self.remoteAddr[1],
-                                                   recvMsg)
-            self.udp_send_used()
-            with open('./log/log', 'a+') as f:
-                f.write(msg+'\n')
-            f.close()
-            self.signalMsgTip.emit(msg)
-            self.udp_send_common()
-            try:
-                if self.udp_download(recvMsg):
-                    msg = '图片成功接收'
-                    self.signalStatusAreaTip.emit(msg)
-                self.udp_send_unused()
-            except Exception:
-                msg = '下载失败'
-                self.signalMsgBoxPrompt.emit(msg)
+        while True:
+            if used_flag:
+                print("recv open")
+                recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
+                recvMsg = 'http://' + recvMsg.decode()
+                print(recvMsg)
+                msg = '{}\n来自IP:{}端口:{}:\n{}\n'.format(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
+                                                       self.remoteAddr[0],
+                                                       self.remoteAddr[1],
+                                                       recvMsg)
+                self.udp_send_used()
+                self.udp_set_used()
+                self.pushButton_recv.setEnabled(False)
+                with open('./log/log', 'a+') as f:
+                    f.write(msg+'\n')
+                f.close()
+                self.signalMsgTip.emit(msg)
+                self.udp_send_common()
+                try:
+                    if self.udp_download(recvMsg):
+                        msg = '图片成功接收'
+                        self.signalStatusAreaTip.emit(msg)
+                        recvMsg = ''
+                    self.udp_send_unused()
+                except Exception:
+                    msg = '下载失败'
+                    self.signalMsgBoxPrompt.emit(msg)
+            else:
+                recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
+                self.udp_send_used()
 
     def udp_download(self, url):
         """
@@ -107,7 +113,10 @@ class UdpTrans(client_ui.Ui_Dialog):
         :return:
         """
         self.udpSocket.sendto('2'.encode('utf-8'), self.remoteAddr)
-        self.__running = False
+
+    def udp_set_used(self):
+        global used_flag
+        used_flag = False
 
     def udp_send_unused(self):
         """
@@ -115,21 +124,9 @@ class UdpTrans(client_ui.Ui_Dialog):
         :return:
         """
         self.udpSocket.sendto('0'.encode('utf-8'), self.remoteAddr)
+        print("here")
         self.pushButton_recv.setEnabled(True)
 
-    def udp_close(self):
-        """
-        udp服务器下线
-        :return:
-        """
-        # msg = '正在断开连接'
-        # self.signalStatusAreaTip.emit(msg)
-        self.udpSocket.close()
-        print(self.__running)
-        self.__running = False  # stop thread
-        print(self.__running)
-
-        stopThreading.stop_thread(self.serverThread)
 
 if __name__ == '__main__':
     insUdpTrans = UdpTrans()

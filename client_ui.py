@@ -6,7 +6,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 import udpTrans
 
@@ -117,7 +117,9 @@ class Ui_Dialog(QtWidgets.QDialog):
         打开接收
         :return:
         """
-        udpTrans.running_flag = True
+        udpTrans.used_flag = True
+        print(udpTrans.used_flag)
+        self.pushButton_recv.setEnabled(False)
 
 
 if __name__ == "__main__":
