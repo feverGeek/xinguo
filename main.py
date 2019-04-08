@@ -12,6 +12,15 @@ class MainWindow(udpTrans.UdpTrans):
         self.setupUi(self.window)
         self.window_connect()
 
+        if self.network_check():
+            msg = '网络正常'
+            self.signalStatusAreaTip.emit(msg)
+            print(msg)
+        else:
+            msg = '网络异常'
+            self.signalMsgBoxPrompt.emit(msg)
+            print(msg)
+
     def window_show(self):
         self.window.show()
 
@@ -21,6 +30,7 @@ class MainWindow(udpTrans.UdpTrans):
         self.pushButton_clear.clicked.connect(self.slot_clear_recv)
         # self.pushButton_exit.clicked.connect(QCoreApplication.quit)
         self.signalStatusAreaTip.connect(self.slot_status_area_tip)
+        self.pushButton_recv.clicked.connect(self.slot_recv)
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
