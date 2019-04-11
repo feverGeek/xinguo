@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QDialog
-import sys
+from sys import exit, argv
 import udpTrans
 
 
@@ -33,12 +33,12 @@ class MainWindow(udpTrans.UdpTrans):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication(argv)
     dialog = QDialog()
     mainwindow = MainWindow(dialog)
     mainwindow.window_show()
     mainwindow.udp_server_start()
-    sys.exit(app.exec_())
+    exit(app.exec_())
 
 
 

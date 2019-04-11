@@ -1,10 +1,11 @@
-from socket import *
+from socket import socket, AF_INET, SOCK_DGRAM
 import client_ui
-import threading
+from threading import Thread
 import datetime
-import requests
-import subprocess
+from requests import get
+from subprocess import Popen, PIPE
 import re
+from sys import platform
 
 used_flag = True
 
@@ -25,18 +26,29 @@ class UdpTrans(client_ui.Ui_Dialog):
         :return:
         """
         try:
-            p = subprocess.Popen(['ping -c 1 -W 1 www.baidu.com'], stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-            out = p.stdout.read().decode()
-            regex = re.compile('1 received')
-            if regex.findall(out)[0] == '1 received':
+            if platform == 'win32':
+                # p = Popen(['Ping -n 1 www.baidu.com'], stdout=PIPE,stderr=PIPE, shell=True)
+                # out = p.stdout.read().decode()
+                # regex = re.compile('已接收 = 1')
+                # if regex.findall(out)[0] == '已接收 = 1':
+                #     return True
+                # else:
+                #     return False
+                # 暂时留坑
                 return True
-            else:
-                return False
+            elif platform == 'linux':
+                p = Popen(['ping -c 1 -W 1 www.baidu.com'], stdout=PIPE,stderr=PIPE,shell=True)
+                out = p.stdout.read().decode()
+                regex = re.compile('1 received')
+                if regex.findall(out)[0] == '1 received':
+                    return True
+                else:
+                    return False
         except Exception:
             return False
 
     def udp_server_start(self):
-        self.serverThread = threading.Thread(target=self.udp_server_concurrency)
+        self.serverThread = Thread(target=self.udp_server_concurrency)
         self.serverThread.setDaemon(True)
         self.serverThread.start()
         msg = 'UDP服务器正在监听{}端口'.format(self.port)
@@ -70,6 +82,7 @@ class UdpTrans(client_ui.Ui_Dialog):
                 self.udp_send_common()
                 try:
                     if self.udp_download(recvMsg):
+                        print("download")
                         msg = '图片成功接收'
                         self.signalStatusAreaTip.emit(msg)
                         recvMsg = ''
@@ -89,7 +102,7 @@ class UdpTrans(client_ui.Ui_Dialog):
                  失败返回None
         """
         try:
-            r = requests.get(url)
+            r = get(url)
             img = r.content
             nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             imgName = nowTime + '.bmp'
@@ -130,4 +143,5 @@ class UdpTrans(client_ui.Ui_Dialog):
 
 if __name__ == '__main__':
     insUdpTrans = UdpTrans()
-    insUdpTrans.udp_server_start()
+    # insUdpTrans.udp_server_start()
+    insUdpTrans.udp_download("http://img.hcfyww.net/1554639887611.bmp")
