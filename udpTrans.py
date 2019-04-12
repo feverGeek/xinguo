@@ -1,7 +1,7 @@
 from socket import socket, AF_INET, SOCK_DGRAM
 import client_ui
 from threading import Thread
-import datetime
+from datetime import datetime
 from requests import get
 from subprocess import Popen, PIPE
 import re
@@ -63,35 +63,42 @@ class UdpTrans(client_ui.Ui_Dialog):
             self.signalMsgBoxPrompt.emit(msg)
 
         while True:
+            recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
             if used_flag:
                 print("recv open")
-                recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
                 recvMsg = 'http://' + recvMsg.decode()
                 print(recvMsg)
-                msg = '{}\n来自IP:{}端口:{}:\n{}\n'.format(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
+                time_now = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                msg = '{}\n来自IP:{}端口:{}:\n{}\n'.format(time_now,
                                                        self.remoteAddr[0],
                                                        self.remoteAddr[1],
                                                        recvMsg)
                 self.udp_send_used()
                 self.udp_set_used()
                 self.pushButton_recv.setEnabled(False)
+
                 with open('./log/log', 'a+') as f:
                     f.write(msg+'\n')
                 f.close()
                 self.signalMsgTip.emit(msg)
                 self.udp_send_common()
+
                 try:
                     if self.udp_download(recvMsg):
                         print("download")
-                        msg = '图片成功接收'
+                        msg = time_now + '\n图片成功接收\n'
                         self.signalStatusAreaTip.emit(msg)
                         recvMsg = ''
+                    else:
+                        msg = time_now + '\n下载失败\n'
+                        self.signalMsgBoxPrompt.emit(msg)
+                        self.signalStatusAreaTip.emit(msg)
                     self.udp_send_unused()
                 except Exception:
                     msg = '下载失败'
                     self.signalMsgBoxPrompt.emit(msg)
+
             else:
-                recvMsg, self.remoteAddr = self.udpSocket.recvfrom(1024)
                 self.udp_send_used()
 
     def udp_download(self, url):
@@ -103,6 +110,8 @@ class UdpTrans(client_ui.Ui_Dialog):
         """
         try:
             r = get(url)
+            if r.status_code != 200:
+                return None
             img = r.content
             nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             imgName = nowTime + '.bmp'
