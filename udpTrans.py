@@ -73,7 +73,7 @@ class UdpTrans(client_ui.Ui_Dialog):
                                                        self.remoteAddr[0],
                                                        self.remoteAddr[1],
                                                        recvMsg)
-                self.udp_send_used()
+                #self.udp_send_used()
                 self.udp_set_used()
                 self.pushButton_recv.setEnabled(False)
 
@@ -84,6 +84,7 @@ class UdpTrans(client_ui.Ui_Dialog):
                 self.udp_send_common()
 
                 try:
+                    print('recvMsg', recvMsg)
                     if self.udp_download(recvMsg):
                         print("download")
                         msg = time_now + '\n图片成功接收\n'
@@ -109,15 +110,19 @@ class UdpTrans(client_ui.Ui_Dialog):
                  失败返回None
         """
         try:
+            print('downloading....')
             r = get(url)
             if r.status_code != 200:
+                print(r.status_code)
                 return None
             img = r.content
-            nowTime = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            nowTime = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             imgName = nowTime + '.bmp'
+            print('before write')
             with open('./img/{}'.format(imgName), 'wb') as f:
                 f.write(img)
             f.close()
+            print('writing...')
             return './img/' + imgName
         except Exception:
             return None
@@ -146,7 +151,6 @@ class UdpTrans(client_ui.Ui_Dialog):
         :return:
         """
         self.udpSocket.sendto('0'.encode('utf-8'), self.remoteAddr)
-        print("here")
         self.pushButton_recv.setEnabled(True)
 
 
